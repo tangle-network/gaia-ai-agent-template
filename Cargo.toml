@@ -25,6 +25,8 @@ tracing-subscriber = { version = "0.3", features = ["parking_lot", "env-filter"]
 blueprint-metadata = "0.1"
 
 [dependencies.gadget-sdk]
-version = "0.1"
+branch = "drew/expose-executor"
+# version = "0.1"
+git = "https://github.com/webb-tools/gadget"
 default-features = false
-features = ["std", "rand", "getrandom"]
+features = ["std", "getrandom"]
