@@ -1,7 +1,7 @@
 use gadget_sdk as sdk;
 use gadget_sdk::executor::process::manager::GadgetProcessManager;
+use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
-use serde::{Serialize, Deserialize};
 
 use color_eyre::{eyre::OptionExt, Result};
 use sdk::{
@@ -17,40 +17,55 @@ pub struct ConfigUpdate {
 }
 
 /// Runs a Gaia node and returns the outputs of each step along with the public URL.
-#[sdk::job(id = 1, params(var), result(_), verifier(evm = "RunGaiaNodeBlueprint"))]
-pub async fn run_gaia_node_job(var: Vec<u8>) -> Result<String, Infallible> {
+#[sdk::job(id = 1, params(data), result(_), verifier(evm = "GaiaAiAgentBlueprint"))]
+pub async fn run_gaia_node_job(data: Vec<u8>) -> Result<String, Infallible> {
     let (_, outputs) = runner::run_gaia_node().await?;
     Ok(serde_json::to_string(&outputs)?)
 }
 
 /// Stops the Gaia node using the GadgetProcessManager.
-#[sdk::job(id = 2, params(var), result(_), verifier(evm = "StopGaiaNodeBlueprint"))]
-pub async fn stop_gaia_node_job(var: Vec<u8>) -> Result<String, Infallible> {
+#[sdk::job(
+    id = 2,
+    params(data),
+    result(_),
+    verifier(evm = "GaiaAiAgentBlueprint")
+)]
+pub async fn stop_gaia_node_job(data: Vec<u8>) -> Result<String, Infallible> {
     let mut manager = GadgetProcessManager::new();
     let (_, outputs) = runner::stop_gaia_node(&mut manager).await?;
     Ok(serde_json::to_string(&outputs)?)
 }
 
 /// Upgrades the Gaia node.
-#[sdk::job(id = 3, params(var), result(_), verifier(evm = "UpgradeGaiaNodeBlueprint"))]
-pub async fn upgrade_gaia_node_job(var: Vec<u8>) -> Result<String, Infallible> {
+#[sdk::job(
+    id = 3,
+    params(data),
+    result(_),
+    verifier(evm = "GaiaAiAgentBlueprint")
+)]
+pub async fn upgrade_gaia_node_job(data: Vec<u8>) -> Result<String, Infallible> {
     let mut manager = GadgetProcessManager::new();
     let (_, outputs) = runner::upgrade_gaia_node(&mut manager).await?;
     Ok(serde_json::to_string(&outputs)?)
 }
 
 /// Updates the Gaia node configuration and restarts the node.
-#[sdk::job(id = 4, params(config_updates), result(_), verifier(evm = "UpdateGaiaConfigBlueprint"))]
+#[sdk::job(
+    id = 4,
+    params(config_updates),
+    result(_),
+    verifier(evm = "GaiaAiAgentBlueprint")
+)]
 pub async fn update_gaia_config_job(config_updates: String) -> Result<String, Infallible> {
     let mut manager = GadgetProcessManager::new();
     let config_updates: Vec<ConfigUpdate> = serde_json::from_str(&config_updates)?;
-    let config_updates: Vec<(&str, &str)> = config_updates.iter().map(|update| (update.key.as_str(), update.value.as_str())).collect();
+    let config_updates: Vec<(&str, &str)> = config_updates
+        .iter()
+        .map(|update| (update.key.as_str(), update.value.as_str()))
+        .collect();
     let (_, outputs) = runner::update_gaia_config(&mut manager, &config_updates).await?;
     Ok(serde_json::to_string(&outputs)?)
 }
-
-
-
 
 #[tokio::main]
 async fn main() -> Result<()> {

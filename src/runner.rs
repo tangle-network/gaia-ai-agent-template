@@ -1,24 +1,24 @@
 use gadget_sdk::executor::process::manager::GadgetProcessManager;
-use std::error::Error;
 use std::collections::HashMap;
+use std::error::Error;
 
 /// Macro to run multiple commands and focus on the output of each command.
-/// 
+///
 /// This macro takes a GadgetProcessManager and a list of commands to run.
 /// It runs each command using the manager and focuses on the output of each command.
 /// The output of each command is stored in a HashMap with the command name as the key.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `$manager` - A mutable reference to the GadgetProcessManager used to run the commands.
 /// * `$commands` - A vector of tuples containing the command name and the command to run.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a HashMap containing the output of each command.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```
 /// let mut manager = GadgetProcessManager::new();
 /// let commands = vec![
@@ -80,9 +80,11 @@ pub async fn run_gaia_node() -> Result<((), HashMap<String, String>), Box<dyn Er
     let outputs = run_and_focus_multiple!(manager, commands);
 
     // Extract the public URL from the start_gaia output
-    let public_url = outputs.get("start_gaia")
+    let public_url = outputs
+        .get("start_gaia")
         .and_then(|output| {
-            output.lines()
+            output
+                .lines()
                 .find(|line| line.contains("https://") && line.contains(".gaianet.xyz"))
                 .map(|line| line.trim().to_string())
         })
@@ -95,7 +97,6 @@ pub async fn run_gaia_node() -> Result<((), HashMap<String, String>), Box<dyn Er
 
     Ok(((), outputs))
 }
-
 
 /// Stops the Gaia node using the GadgetProcessManager.
 ///
@@ -125,16 +126,18 @@ pub async fn run_gaia_node() -> Result<((), HashMap<String, String>), Box<dyn Er
 /// let (_, outputs) = stop_gaia_node(&mut manager).await?;
 /// println!("Stop command output: {}", outputs.get("stop_gaia").unwrap());
 /// ```
-pub async fn stop_gaia_node(manager: &mut GadgetProcessManager) -> Result<((), HashMap<String, String>), Box<dyn Error>> {
-    let commands = vec![
-        ("stop_gaia", "gaianet stop"),
-    ];
+pub async fn stop_gaia_node(
+    manager: &mut GadgetProcessManager,
+) -> Result<((), HashMap<String, String>), Box<dyn Error>> {
+    let commands = vec![("stop_gaia", "gaianet stop")];
 
     let outputs = run_and_focus_multiple!(manager, commands);
     Ok(((), outputs))
 }
 
-pub async fn upgrade_gaia_node(manager: &mut GadgetProcessManager) -> Result<((), HashMap<String, String>), Box<dyn Error>> {
+pub async fn upgrade_gaia_node(
+    manager: &mut GadgetProcessManager,
+) -> Result<((), HashMap<String, String>), Box<dyn Error>> {
     let commands = vec![
         ("stop_gaia", "gaianet stop"),
         ("upgrade_gaia_node", "curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash -s -- --upgrade"),
@@ -183,7 +186,10 @@ pub async fn upgrade_gaia_node(manager: &mut GadgetProcessManager) -> Result<(()
 /// println!("Update outputs: {:?}", outputs);
 /// ```
 
-pub async fn update_gaia_config(manager: &mut GadgetProcessManager, config_updates: &[(&str, &str)]) -> Result<((), HashMap<String, String>), Box<dyn Error>> {
+pub async fn update_gaia_config(
+    manager: &mut GadgetProcessManager,
+    config_updates: &[(&str, &str)],
+) -> Result<((), HashMap<String, String>), Box<dyn Error>> {
     let mut commands = Vec::new();
 
     for (key, value) in config_updates {
@@ -202,28 +208,28 @@ pub async fn update_gaia_config(manager: &mut GadgetProcessManager, config_updat
 }
 
 /// Validates a configuration command for the Gaia node.
-/// 
+///
 /// This function validates the key and value of a configuration command for the Gaia node.
 /// It checks if the key is a known configuration parameter and if the value is valid.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `key` - A string slice containing the configuration key.
 /// * `value` - A string slice containing the configuration value.
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns a Result containing:
 /// - `()` if the configuration command is valid.
-/// 
+///
 /// # Errors
-/// 
+///
 /// This function will return an error if:
 /// - The key is not a known configuration parameter.
 /// - The value is invalid for the specified key.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```
 /// let key = "chat-url";
 /// let value = "https://new-chat-url.com";
@@ -235,19 +241,21 @@ pub fn validate_config_command(key: &str, value: &str) -> Result<(), Box<dyn Err
             if !value.starts_with("http://") && !value.starts_with("https://") {
                 return Err(format!("Invalid URL for {}: {}", key, value).into());
             }
-        },
+        }
         "chat-ctx-size" | "embedding-ctx-size" | "port" => {
-            value.parse::<u32>().map_err(|_| format!("Invalid number for {}: {}", key, value))?;
-        },
+            value
+                .parse::<u32>()
+                .map_err(|_| format!("Invalid number for {}: {}", key, value))?;
+        }
         "prompt-template" | "system-prompt" | "rag-prompt" | "reverse-prompt" => {
             // These are strings, so no validation needed
-        },
+        }
         "base" => {
             // Validate if the path exists
             if !std::path::Path::new(value).exists() {
                 return Err(format!("Invalid path for base: {}", value).into());
             }
-        },
+        }
         _ => return Err(format!("Unknown config key: {}", key).into()),
     }
     Ok(())
