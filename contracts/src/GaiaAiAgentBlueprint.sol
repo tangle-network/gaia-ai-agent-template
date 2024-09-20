@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSE
 pragma solidity >=0.8.13;
 
-import "core/BlueprintServiceManager.sol";
+import "tnt-core/BlueprintServiceManager.sol";
 
 /**
  * @title HelloBlueprint
  * @dev This contract is an example of a service blueprint that provides a single service.
  */
-contract HelloBlueprint is BlueprintServiceManager {
+contract GaiaAiAgentBlueprint is BlueprintServiceManager {
     /**
      * @dev Hook for service operator registration. Called when a service operator
      * attempts to register with the blueprint.
@@ -57,7 +57,24 @@ contract HelloBlueprint is BlueprintServiceManager {
         bytes calldata _inputs,
         bytes calldata _outputs
     ) public virtual override onlyFromRootChain {
-        // Do something with the job call result
+        // Check that we have this service instance
+        require(
+            serviceInstances[serviceId].length > 0,
+            "Service instance not found"
+        );
+        // Check if job is zero.
+        require(job == 0, "Job not found");
+        // Check if the participant is a registered operator
+        address operatorAddress = address(bytes20(keccak256(participant)));
+        require(
+            operators[operatorAddress].length > 0,
+            "Operator not registered"
+        );
+        // Check if operator is part of the service instance
+        require(
+            isOperatorInServiceInstance(serviceId, operatorAddress),
+            "Operator not part of service instance"
+        );
     }
 
     /**
