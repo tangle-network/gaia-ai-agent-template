@@ -23,7 +23,7 @@ contract GaiaAiAgentTaskManager is
     using BN254 for BN254.G1Point;
 
     constructor(
-        IRegistryCoordinator _registryCoordinator,
+        IRegistryCoordinator _registryCoordinator
     ) BLSSignatureChecker(_registryCoordinator) {
         
     }
