@@ -30,7 +30,7 @@ contract GaiaAiAgentTaskManager is
 
     function initialize(
         IPauserRegistry _pauserRegistry,
-        address initialOwner,
+        address initialOwner
     ) public initializer {
         _initializePauser(_pauserRegistry, UNPAUSE_ALL);
         _transferOwnership(initialOwner);
