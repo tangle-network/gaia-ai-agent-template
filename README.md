@@ -1,8 +1,7 @@
 # <h1 align="center"> Gaia AI Agent AVS Blueprint 🌐 </h1>
 
 ## 📚 Overview
-This repo contains a templated AVS Blueprint for a Gaia AI Agent Node. It contains tasks for an operator to manager their own Gaia AI Node and aims to expose both operator centric and user centric tasks.
-
+This repo contains a templated AVS Blueprint for a Gaia AI Agent Node. It contains tasks for an operator to manage their own Gaia AI Node and aims to expose both operator centric and user centric tasks.
 
 ## 🚀 Features
 
