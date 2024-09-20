@@ -1,0 +1,30 @@
+[package]
+name = "gaia-ai-agent-template"
+version = "0.1.0"
+edition = "2021"
+description = "A template Tangle Blueprint (AVS) for a gaia ai agent application service."
+authors = ["drewstone <drewstone329@gmail.com>"]
+license = "Unlicense"
+homepage = "https://tangle.tools"
+repository = "https://github.com/drewstone/gaia-ai-agent-template"
+readme = "README.md"
+categories = ["cryptography", "cryptography::cryptocurrencies", "tangle-blueprint"]
+keywords = ["tangle", "blueprint", "avs"]
+rust-version = "1.79"
+
+[dependencies]
+tracing = "0.1"
+async-trait = "0.1"
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = { version = "1.0.128" }
+color-eyre = "0.6"
+tokio = { version = "1.39", default-features = false, features = ["full"] }
+tracing-subscriber = { version = "0.3", features = ["parking_lot", "env-filter"] }
+
+[build-dependencies]
+blueprint-metadata = "0.1"
+
+[dependencies.gadget-sdk]
+version = "0.1"
+default-features = false
+features = ["std", "rand", "getrandom"]
