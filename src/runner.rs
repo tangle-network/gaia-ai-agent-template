@@ -31,7 +31,7 @@ macro_rules! run_and_focus_multiple {
     ($manager:expr, $commands:expr) => {{
         let mut outputs = HashMap::new();
         for (name, command) in $commands {
-            let service = $manager.run(name.to_string(), command).await?;
+            let service = $manager.run(name.to_string(), &command).await?;
             let output = $manager.focus_service_to_completion(service).await?;
             outputs.insert(name, output);
         }
@@ -82,7 +82,7 @@ pub async fn run_gaia_node() -> Result<((), HashMap<String, String>), Box<dyn Er
     // Extract the public URL from the start_gaia output
     let public_url = outputs
         .get("start_gaia")
-        .and_then(|output| {
+        .and_then(|output: &str| {
             output
                 .lines()
                 .find(|line| line.contains("https://") && line.contains(".gaianet.xyz"))
