@@ -2,20 +2,20 @@ use gadget_sdk::executor::process::manager::GadgetProcessManager;
 use std::collections::HashMap;
 use std::error::Error;
 
-/// Macro to run multiple commands and focus on the output of each command.
+/// Function to run multiple commands and focus on the output of each command.
 ///
-/// This macro takes a GadgetProcessManager and a list of commands to run.
+/// This function takes a GadgetProcessManager and a list of commands to run.
 /// It runs each command using the manager and focuses on the output of each command.
 /// The output of each command is stored in a HashMap with the command name as the key.
 ///
 /// # Arguments
 ///
-/// * `$manager` - A mutable reference to the GadgetProcessManager used to run the commands.
-/// * `$commands` - A vector of tuples containing the command name and the command to run.
+/// * `manager` - A mutable reference to the GadgetProcessManager used to run the commands.
+/// * `commands` - A vector of tuples containing the command name and the command to run.
 ///
 /// # Returns
 ///
-/// Returns a HashMap containing the output of each command.
+/// Returns a Result containing a HashMap with the output of each command, or an error.
 ///
 /// # Example
 ///
@@ -25,18 +25,19 @@ use std::error::Error;
 ///    ("command1", "echo 'Hello World'"),
 ///    ("command2", "ls -l"),
 /// ];
-/// let outputs = run_and_focus_multiple!(manager, commands);
+/// let outputs = run_and_focus_multiple(&mut manager, commands).await?;
 /// ```
-macro_rules! run_and_focus_multiple {
-    ($manager:expr, $commands:expr) => {{
-        let mut outputs = HashMap::new();
-        for (name, command) in $commands {
-            let service = $manager.run(name.to_string(), command).await?;
-            let output = $manager.focus_service_to_completion(service).await?;
-            outputs.insert(name, output);
-        }
-        outputs
-    }};
+async fn run_and_focus_multiple<'a>(
+    manager: &mut GadgetProcessManager,
+    commands: Vec<(&'a str, &'a str)>,
+) -> Result<HashMap<String, String>, Box<dyn Error>> {
+    let mut outputs = HashMap::new();
+    for (name, command) in commands {
+        let service = manager.run(name.to_string(), command).await?;
+        let output = manager.focus_service_to_completion(service).await?;
+        outputs.insert(name.to_string(), output);
+    }
+    Ok(outputs)
 }
 
 /// Runs a Gaia node and returns the outputs of each step along with the public URL.
@@ -67,9 +68,9 @@ macro_rules! run_and_focus_multiple {
 /// let (_, outputs) = run_gaia_node().await?;
 /// println!("Gaia node public URL: {}", outputs.get("public_url").unwrap());
 /// ```
-pub async fn run_gaia_node() -> Result<((), HashMap<String, String>), Box<dyn Error>> {
-    let mut manager = GadgetProcessManager::new();
-
+pub async fn run_gaia_node(
+    manager: &mut GadgetProcessManager,
+) -> Result<((), HashMap<String, String>), Box<dyn Error>> {
     let commands = vec![
         ("binary_install", "curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash"),
         ("source_dir", "source ~/.bashrc"),
@@ -77,12 +78,12 @@ pub async fn run_gaia_node() -> Result<((), HashMap<String, String>), Box<dyn Er
         ("start_gaia", "gaianet start"),
     ];
 
-    let outputs = run_and_focus_multiple!(manager, commands);
+    let mut outputs = run_and_focus_multiple(manager, commands).await?;
 
     // Extract the public URL from the start_gaia output
     let public_url = outputs
         .get("start_gaia")
-        .and_then(|output| {
+        .and_then(|output: &String| {
             output
                 .lines()
                 .find(|line| line.contains("https://") && line.contains(".gaianet.xyz"))
@@ -93,7 +94,7 @@ pub async fn run_gaia_node() -> Result<((), HashMap<String, String>), Box<dyn Er
     println!("Gaia node public URL: {}", public_url);
 
     // You can return the public_url if needed
-    outputs.insert("public_url", public_url);
+    outputs.insert("public_url".to_string(), public_url);
 
     Ok(((), outputs))
 }
@@ -131,7 +132,7 @@ pub async fn stop_gaia_node(
 ) -> Result<((), HashMap<String, String>), Box<dyn Error>> {
     let commands = vec![("stop_gaia", "gaianet stop")];
 
-    let outputs = run_and_focus_multiple!(manager, commands);
+    let outputs = run_and_focus_multiple(manager, commands).await?;
     Ok(((), outputs))
 }
 
@@ -145,7 +146,7 @@ pub async fn upgrade_gaia_node(
         ("start_gaia", "gaianet start"),
     ];
 
-    let outputs = run_and_focus_multiple!(manager, commands);
+    let outputs = run_and_focus_multiple(manager, commands).await?;
     Ok(((), outputs))
 }
 
@@ -190,20 +191,27 @@ pub async fn update_gaia_config(
     manager: &mut GadgetProcessManager,
     config_updates: &[(&str, &str)],
 ) -> Result<((), HashMap<String, String>), Box<dyn Error>> {
-    let mut commands = Vec::new();
+    let mut commands: Vec<(String, String)> = Vec::new();
 
     for (key, value) in config_updates {
         // Validate the config command
         validate_config_command(key, value)?;
         // Generate the config command
         let config_command = format!("gaianet config --{} {}", key, value);
-        commands.push((format!("update_{}", key), config_command));
+        let config_key = format!("update_{}", key);
+        commands.push((config_key, config_command));
     }
 
-    commands.push((String::from("init_gaia"), String::from("gaianet init")));
-    commands.push((String::from("start_gaia"), String::from("gaianet start")));
+    commands.push(("init_gaia".to_string(), "gaianet init".to_string()));
+    commands.push(("start_gaia".to_string(), "gaianet start".to_string()));
 
-    let outputs = run_and_focus_multiple!(manager, commands);
+    // Convert commands into a Vec<(&str, &str)>
+    let commands: Vec<(&str, &str)> = commands
+        .iter()
+        .map(|(key, value)| (key.as_str(), value.as_str()))
+        .collect();
+
+    let outputs = run_and_focus_multiple(manager, commands).await?;
     Ok(((), outputs))
 }
 
