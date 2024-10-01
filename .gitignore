@@ -28,3 +28,4 @@ docs/
 # Dotenv file
 .env
 blueprint.lock
+blueprint.json

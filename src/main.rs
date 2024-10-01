@@ -9,7 +9,6 @@ use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
 use structopt::StructOpt;
 
-
 pub use gaia_ai_agent_template as blueprint;
 
 #[tokio::main]
