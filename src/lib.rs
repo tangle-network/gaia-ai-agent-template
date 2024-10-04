@@ -1,13 +1,7 @@
 use color_eyre::Result;
 use gadget_sdk::executor::process::manager::GadgetProcessManager;
-use gadget_sdk::{self as sdk, config::ContextConfig};
-use sdk::{
-    events_watcher::substrate::SubstrateEventWatcher, events_watcher::tangle::TangleEventsWatcher,
-    tangle_subxt::*,
-};
 use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
-use structopt::StructOpt;
 
 pub mod runner;
 
@@ -18,7 +12,7 @@ pub struct ConfigUpdate {
 }
 
 /// Runs a Gaia node and returns the outputs of each step along with the public URL.
-#[sdk::job(
+#[gadget_sdk::job(
     id = 1,
     params(data),
     result(_),
@@ -31,7 +25,7 @@ pub async fn run_gaia_node_job(data: Vec<u8>) -> Result<String, Infallible> {
 }
 
 /// Stops the Gaia node using the GadgetProcessManager.
-#[sdk::job(
+#[gadget_sdk::job(
     id = 2,
     params(data),
     result(_),
@@ -44,7 +38,7 @@ pub async fn stop_gaia_node_job(data: Vec<u8>) -> Result<String, Infallible> {
 }
 
 /// Upgrades the Gaia node.
-#[sdk::job(
+#[gadget_sdk::job(
     id = 3,
     params(data),
     result(_),
@@ -57,7 +51,7 @@ pub async fn upgrade_gaia_node_job(data: Vec<u8>) -> Result<String, Infallible> 
 }
 
 /// Updates the Gaia node configuration and restarts the node.
-#[sdk::job(
+#[gadget_sdk::job(
     id = 4,
     params(config_updates),
     result(_),
