@@ -16,9 +16,9 @@ use gadget_sdk::{
     },
     tx,
 };
-use structopt::StructOpt;
-
 pub use gaia_ai_agent_template as blueprint;
+use gaia_ai_agent_template::actix_server;
+use structopt::StructOpt;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -36,8 +36,21 @@ async fn main() -> Result<()> {
         runner.register().await?;
     }
 
-    // Run the gadget / AVS
-    runner.run().await?;
+    let model = "llama".to_string();
+    let service_id = env.service_id.unwrap_or_default();
+    // Run the server and the gadget concurrently
+    tokio::select! {
+        server_result = actix_server::server::run_server(service_id, model) => {
+            if let Err(e) = server_result {
+                eprintln!("Server error: {}", e);
+            }
+        }
+        runner_result = runner.run() => {
+            if let Err(e) = runner_result {
+                eprintln!("Runner error: {}", e);
+            }
+        }
+    }
 
     Ok(())
 }

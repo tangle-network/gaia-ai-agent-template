@@ -1,107 +1,72 @@
 # <h1 align="center"> Gaia AI Agent AVS Blueprint 🌐 </h1>
 
-## 📚 Overview
-This repo contains a templated AVS Blueprint for a Gaia AI Agent Node. It contains tasks for an operator to manage their own Gaia AI Node and aims to expose both operator centric and user centric tasks.
+# Gaia AI Agent AVS Blueprint
 
-## 🚀 Features
+## Overview
 
-This Gaia AI Agent AVS Blueprint provides the following key features:
+The Gaia AI Agent AVS Blueprint is a templated Autonomous Validation Service (AVS) Blueprint for managing and interacting with Gaia AI Nodes. This blueprint leverages the Tangle network for decentralized deployment and management, with potential integration into the EigenLayer ecosystem.
 
-### 1. Run Gaia Node
-- **Function**: `run_gaia_node_job`
-- **Description**: Initializes and starts a Gaia node, returning the outputs of each step along with the public URL.
-- **Job ID**: 1
+## Key Features
 
-### 2. Stop Gaia Node
-- **Function**: `stop_gaia_node_job`
-- **Description**: Stops the running Gaia node using the GadgetProcessManager.
-- **Job ID**: 2
+1. **Gaia Node Management**
+   - Run, stop, upgrade, and configure Gaia nodes
+   - Onchain operator management via Tangle network
 
-### 3. Upgrade Gaia Node
-- **Function**: `upgrade_gaia_node_job`
-- **Description**: Upgrades the Gaia node to the latest version.
-- **Job ID**: 3
+2. **AI Interaction Services**
+   - Chat with AI models
+   - Analyze images
+   - Create images
+   - Edit images
 
-### 4. Update Gaia Configuration
-- **Function**: `update_gaia_config_job`
-- **Description**: Updates the Gaia node configuration and restarts the node with the new settings.
-- **Job ID**: 4
+3. **Flexible Model Selection**
+   - Support for various AI models compatible with different tasks
 
-Each of these jobs is designed to be instanced as part of the Tangle network's Cloud, allowing for decentralized management and operation of Gaia AI nodes.
+4. **Decentralized Deployment**
+   - Instance across registered Tangle operators
+   - Potential EigenLayer AVS integration
 
-## 🔧 Usage
+## Architecture
 
-To interact with these jobs, you'll need to deploy this blueprint to Tangle. Upon deployment, the Blueprint will be able to be instanced and executed by any Tangle operator registered on the Gaia AI Agent Blueprint. Each job can be triggered by sending the appropriate transaction to the Tangle network, specifying the job ID and any required parameters.
+The blueprint consists of two main components:
 
-For example, to update the Gaia configuration, you would prepare a transaction with job ID 4 and include the configuration updates as parameters in the format specified by the `ConfigUpdate` struct.
+1. **Tangle Blueprint**: Manages Gaia node operations and service instantiation.
+2. **HTTP Server**: Exposes AI interaction endpoints for users.
 
-Please refer to the Tangle network documentation for detailed instructions on how to submit jobs and interact with AVS Blueprints.
+## Usage
 
+### For Developers
 
-## 🔗 EigenLayer Compatibility
+- Create new extensions and add new functions.
+- Integrate realtime websocket service.
+- Add incentives and payments.
+- Add api keys for managing auth/access-control.
 
-This Gaia AI Agent AVS Blueprint is designed to be compatible with EigenLayer, leveraging key contract interfaces to integrate seamlessly with the EigenLayer ecosystem. This compatibility allows for enhanced security, scalability, and interoperability within the broader Ethereum ecosystem.
+### For Operators
 
-### EigenLayer Integration
+1. Register for Gaia Tangle Blueprints
+2. Instance the service on Tangle operators.
+3. Manage Gaia nodes using onchain transactions.
 
-The blueprint integrates with EigenLayer through the following key contracts:
+### For Users
 
-1. **TaskManager Contract**
-   - **Purpose**: Manages the execution of tasks within the EigenLayer framework.
-   - **Integration**: Our blueprint interfaces with the TaskManager to register and manage Gaia AI Agent tasks, ensuring they are properly scheduled and executed within the EigenLayer ecosystem.
-   - **Benefits**: Enables decentralized task execution and verification, enhancing the reliability and trustlessness of Gaia AI Agent operations.
+Interact with the AI services via HTTP endpoints:
+- `/chat`: Chat with the AI model
+- `/analyze_image`: Analyze images
+- `/create_image`: Generate images
+- `/edit_image`: Edit existing images
 
-2. **ServiceManager Contract**
-   - **Purpose**: Oversees the registration and management of services within EigenLayer.
-   - **Integration**: The Gaia AI Agent service is registered and managed through this contract, allowing for seamless integration with EigenLayer's service ecosystem.
-   - **Benefits**: Provides a standardized way to deploy and manage the Gaia AI Agent service, ensuring compatibility with other EigenLayer services and infrastructure.
+## Development
 
-### Implementation Details
-
-To leverage these EigenLayer contracts, the blueprint implements the following:
-
-- **Task Registration**: Tasks such as running, stopping, upgrading, and configuring Gaia nodes are registered with the TaskManager contract.
-- **Service Registration**: The Gaia AI Agent service is registered with the ServiceManager contract, making it discoverable and manageable within the EigenLayer ecosystem.
-- **Middleware Integration**: Custom middleware is implemented to handle the communication between our blueprint's jobs and EigenLayer's contract interfaces.
-
-### Benefits of EigenLayer Compatibility
-
-1. **Enhanced Security**: Leveraging EigenLayer's security model for task execution and service management.
-2. **Scalability**: Ability to scale operations within the EigenLayer ecosystem.
-3. **Interoperability**: Seamless interaction with other EigenLayer-compatible services and applications.
-4. **Standardization**: Adherence to EigenLayer standards ensures long-term compatibility and easier updates.
-
-### Future Developments
-
-As EigenLayer continues to evolve, this blueprint will be updated to leverage new features and improvements in the EigenLayer ecosystem, ensuring ongoing compatibility and optimal performance.
-
-For more information on EigenLayer and its contract interfaces, please refer to the [EigenLayer documentation](https://docs.eigenlayer.xyz/).
-
-
-
-
-## 📚 Prerequisites
-
-Before you can run this project, you will need to have the following software installed on your machine:
-
+Prerequisites:
 - [Rust](https://www.rust-lang.org/tools/install)
 - [Forge](https://getfoundry.sh)
-- [Tangle](https://github.com/webb-tools/tangle?tab=readme-ov-file#-getting-started-)
+- [Tangle](https://github.com/tangle-network/tangle?tab=readme-ov-file#-getting-started-)
+- [Tangle CLI] `cargo install cargo-tangle`
 
-## 🛠️ Development
-
-Once you have created a new project, you can run the following command to start the project:
-
-```sh
+Build the project:
+```bash
 cargo build
 ```
-to build the project, and
-
-```sh
-cargo install cargo-tangle
-cargo tangle gadget deploy
-```
-to deploy the blueprint to the Tangle network.
 
 ## 📜 License
 

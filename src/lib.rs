@@ -3,6 +3,7 @@ use gadget_sdk::executor::process::manager::GadgetProcessManager;
 use serde::{Deserialize, Serialize};
 use std::convert::Infallible;
 
+pub mod actix_server;
 pub mod runner;
 
 #[derive(Serialize, Deserialize)]

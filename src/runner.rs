@@ -193,14 +193,18 @@ pub async fn update_gaia_config(
 ) -> Result<((), HashMap<String, String>), Box<dyn Error>> {
     let mut commands: Vec<(String, String)> = Vec::new();
 
+    // Validate all config commands
     for (key, value) in config_updates {
-        // Validate the config command
         validate_config_command(key, value)?;
-        // Generate the config command
-        let config_command = format!("gaianet config --{} {}", key, value);
-        let config_key = format!("update_{}", key);
-        commands.push((config_key, config_command));
     }
+
+    // Generate a single config command with all updates
+    let mut config_command = String::from("gaianet config");
+    for (key, value) in config_updates {
+        config_command.push_str(&format!(" \\\n  --{} {}", key, value));
+    }
+
+    commands.push(("update_config".to_string(), config_command));
 
     commands.push(("init_gaia".to_string(), "gaianet init".to_string()));
     commands.push(("start_gaia".to_string(), "gaianet start".to_string()));
@@ -245,9 +249,20 @@ pub async fn update_gaia_config(
 /// ```
 pub fn validate_config_command(key: &str, value: &str) -> Result<(), Box<dyn Error>> {
     match key {
-        "chat-url" | "embedding-url" => {
-            if !value.starts_with("http://") && !value.starts_with("https://") {
-                return Err(format!("Invalid URL for {}: {}", key, value).into());
+        "chat-url" | "embedding-url" | "snapshot" => {
+            if value.starts_with("http://") || value.starts_with("https://") {
+                // Validate URL structure
+                if let Err(_) = url::Url::parse(value) {
+                    return Err(format!("Invalid URL structure for {}: {}", key, value).into());
+                }
+            } else {
+                // Check if it's a local file under $HOME/gaianet
+                let home_dir = std::env::var("HOME").unwrap_or_default();
+                let gaia_path = std::path::Path::new(&home_dir).join("gaianet");
+                let file_path = std::path::Path::new(value);
+                if !file_path.exists() || !file_path.starts_with(&gaia_path) {
+                    return Err(format!("Invalid value for {}: {}. It should be a valid URL or a local file under $HOME/gaianet", key, value).into());
+                }
             }
         }
         "chat-ctx-size" | "embedding-ctx-size" | "port" => {
@@ -262,6 +277,30 @@ pub fn validate_config_command(key: &str, value: &str) -> Result<(), Box<dyn Err
             // Validate if the path exists
             if !std::path::Path::new(value).exists() {
                 return Err(format!("Invalid path for base: {}", value).into());
+            }
+        }
+        "qdrant-limit" => {
+            let limit = value
+                .parse::<u32>()
+                .map_err(|_| format!("Invalid number for qdrant-limit: {}", value))?;
+            if limit == 0 {
+                return Err("qdrant-limit must be greater than 0".into());
+            }
+        }
+        "qdrant-score-threshold" => {
+            let threshold = value
+                .parse::<f32>()
+                .map_err(|_| format!("Invalid number for qdrant-score-threshold: {}", value))?;
+            if threshold < 0.0 || threshold > 1.0 {
+                return Err("qdrant-score-threshold must be between 0.0 and 1.0".into());
+            }
+        }
+        "rag-policy" => {
+            match value {
+                "system-message" | "last-user-message" => {
+                    // These are valid options, no further validation needed
+                }
+                _ => return Err(format!("Invalid rag-policy value: {}. Must be either 'system-message' or 'last-user-message'", value).into()),
             }
         }
         _ => return Err(format!("Unknown config key: {}", key).into()),
