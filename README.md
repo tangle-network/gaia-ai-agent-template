@@ -1,5 +1,3 @@
-# <h1 align="center"> Gaia AI Agent AVS Blueprint 🌐 </h1>
-
 # Gaia AI Agent AVS Blueprint
 
 ## Overview
