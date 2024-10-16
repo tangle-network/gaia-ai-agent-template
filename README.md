@@ -59,7 +59,7 @@ Prerequisites:
 - [Rust](https://www.rust-lang.org/tools/install)
 - [Forge](https://getfoundry.sh)
 - [Tangle](https://github.com/tangle-network/tangle?tab=readme-ov-file#-getting-started-)
-- [Tangle CLI] `cargo install cargo-tangle`
+- **`cargo install cargo-tangle`** or [Tangle CLI Download Link](https://github.com/webb-tools/gadget/releases/download/cargo-tangle-v0.1.2/cargo-tangle-installer.sh)
 
 Build the project:
 ```bash
